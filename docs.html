@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Horde Survival Template — Documentation | IronFrame</title>
+<style>
+  :root { --bg:#0b0d12; --card:#161a23; --border:#232837; --text:#e6e8ee; --muted:#9aa3b5; --purple:#8b5cf6; --emerald:#10b981; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,"Segoe UI",Inter,Roboto,"Helvetica Neue",Arial,sans-serif; line-height:1.65; }
+  .nav { position:sticky; top:0; background:rgba(11,13,18,.85); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); }
+  .nav .in { max-width:960px; margin:0 auto; padding:0 1.25rem; height:64px; display:flex; align-items:center; justify-content:space-between; }
+  .brand { font-weight:800; color:var(--text); text-decoration:none; } .brand span { color:var(--purple); }
+  .nav a.back { color:var(--muted); text-decoration:none; font-size:.95rem; } .nav a.back:hover { color:var(--text); }
+  main { max-width:960px; margin:0 auto; padding:2.5rem 1.25rem 5rem; }
+  main h1 { font-size:2.2rem; letter-spacing:-.02em; margin:0 0 .5rem; }
+  main h2 { font-size:1.6rem; margin:2.5rem 0 .8rem; padding-top:1.2rem; border-top:1px solid var(--border); }
+  main h3 { font-size:1.2rem; margin:1.8rem 0 .6rem; color:#c4b5fd; }
+  main h4 { margin:1.2rem 0 .4rem; }
+  a { color:var(--emerald); }
+  code { font-family:ui-monospace,"Cascadia Code",Consolas,monospace; font-size:.9em; background:#12151c; border:1px solid var(--border); padding:.1em .4em; border-radius:6px; }
+  pre { background:#0e1117; border:1px solid var(--border); border-radius:10px; padding:1rem 1.2rem; overflow-x:auto; font-size:.85rem; line-height:1.55; }
+  pre code { background:none; border:0; padding:0; }
+  table { border-collapse:collapse; width:100%; margin:1rem 0; font-size:.93rem; display:block; overflow-x:auto; }
+  th, td { border:1px solid var(--border); padding:.55rem .7rem; text-align:left; vertical-align:top; }
+  th { background:var(--card); }
+  blockquote { margin:1rem 0; padding:.6rem 1rem; border-left:3px solid var(--purple); background:rgba(139,92,246,.1); color:var(--text); }
+  hr { border:0; border-top:1px solid var(--border); margin:2rem 0; }
+  .loading { color:var(--muted); }
+</style>
+</head>
+<body>
+<header class="nav"><div class="in"><a class="brand" href="index.html">IronFrame<span>.</span></a><a class="back" href="index.html">← Back to portfolio</a></div></header>
+<main>
+  <p class="loading" id="status">Loading documentation…</p>
+  <article id="content"></article>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script>
+  fetch('horde-survival-docs.md')
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+    .then(function (md) {
+      document.getElementById('content').innerHTML = marked.parse(md);
+      document.getElementById('status').remove();
+    })
+    .catch(function () {
+      document.getElementById('status').textContent = 'Documentation could not be loaded. The full README ships inside the package.';
+    });
+</script>
+</body>
+</html>

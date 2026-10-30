@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IronFrame — Systems &amp; Tools Developer</title>
+<meta name="description" content="Unity systems and tools developer building clean, data-driven game templates: object pooling, ScriptableObject architecture, event-driven UI, and real developer support.">
+<style>
+  /* ---------- Design tokens ---------- */
+  :root {
+    --bg: #0b0d12;
+    --bg-elev: #12151c;
+    --bg-card: #161a23;
+    --border: #232837;
+    --text: #e6e8ee;
+    --muted: #9aa3b5;
+    --purple: #8b5cf6;
+    --purple-soft: rgba(139, 92, 246, 0.14);
+    --emerald: #10b981;
+    --emerald-soft: rgba(16, 185, 129, 0.14);
+    --radius: 14px;
+    --max: 1120px;
+    --font: -apple-system, "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "Cascadia Code", "JetBrains Mono", Consolas, "Courier New", monospace;
+  }
+
+  /* ---------- Base ---------- */
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--emerald); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1, h2, h3, h4 { line-height: 1.2; margin: 0 0 0.5rem; letter-spacing: -0.01em; }
+  h2 { font-size: clamp(1.6rem, 2.6vw, 2.1rem); }
+  h3 { font-size: 1.25rem; }
+  p { margin: 0 0 1rem; }
+  code { font-family: var(--mono); font-size: 0.9em; background: var(--bg-elev); border: 1px solid var(--border); padding: 0.1em 0.4em; border-radius: 6px; }
+  pre { margin: 0; background: #0e1117; border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.2rem; overflow-x: auto; font-family: var(--mono); font-size: 0.85rem; line-height: 1.55; color: #d7dce6; }
+  pre code { background: none; border: 0; padding: 0; font-size: inherit; }
+  .container { max-width: var(--max); margin: 0 auto; padding: 0 1.25rem; }
+  section { padding: 4.5rem 0; }
+  .eyebrow { display: inline-block; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--purple); margin-bottom: 0.6rem; }
+  .lead { color: var(--muted); font-size: 1.05rem; max-width: 62ch; }
+
+  /* ---------- Nav ---------- */
+  .nav {
+    position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+    background: rgba(11, 13, 18, 0.8);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav .container { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .brand { font-weight: 800; letter-spacing: -0.02em; color: var(--text); }
+  .brand span { color: var(--purple); }
+  .nav-links { display: flex; gap: 1.4rem; }
+  .nav-links a { color: var(--muted); font-weight: 500; font-size: 0.95rem; }
+  .nav-links a:hover { color: var(--text); text-decoration: none; }
+
+  /* ---------- Hero ---------- */
+  .hero { padding: 6rem 0 4rem; position: relative; overflow: hidden; }
+  .hero::before {
+    content: ""; position: absolute; inset: -40% -20% auto -20%; height: 120%;
+    background:
+      radial-gradient(600px 300px at 20% 30%, rgba(139, 92, 246, 0.22), transparent 60%),
+      radial-gradient(500px 260px at 80% 20%, rgba(16, 185, 129, 0.16), transparent 60%);
+    pointer-events: none;
+  }
+  .hero .container { position: relative; }
+  .hero h1 { font-size: clamp(2.1rem, 5vw, 3.6rem); font-weight: 800; margin-bottom: 1rem; }
+  .hero h1 .accent { background: linear-gradient(90deg, var(--purple), var(--emerald)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero .tag { color: var(--muted); font-size: 1.15rem; max-width: 60ch; margin-bottom: 1.8rem; }
+  .btn-row { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-bottom: 1.8rem; }
+  .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.7rem 1.2rem; border-radius: 10px; font-weight: 600; border: 1px solid var(--border); color: var(--text); background: var(--bg-card); transition: transform .15s ease, border-color .15s ease; }
+  .btn:hover { transform: translateY(-2px); border-color: var(--purple); text-decoration: none; }
+  .btn.primary { background: var(--purple); border-color: var(--purple); color: #fff; }
+  .btn.primary:hover { border-color: #a78bfa; }
+  .btn.emerald { background: var(--emerald); border-color: var(--emerald); color: #04120c; }
+  .badges { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .badge { font-size: 0.78rem; font-weight: 600; padding: 0.3rem 0.65rem; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); background: var(--bg-elev); }
+  .badge.purple { color: #c4b5fd; background: var(--purple-soft); border-color: rgba(139,92,246,.35); }
+  .badge.emerald { color: #6ee7b7; background: var(--emerald-soft); border-color: rgba(16,185,129,.35); }
+
+  /* ---------- Principles strip ---------- */
+  .principles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 2.5rem; }
+  .principle { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem 1.2rem; }
+  .principle .ico { font-size: 1.3rem; margin-bottom: 0.4rem; }
+  .principle b { display: block; margin-bottom: 0.2rem; }
+  .principle span { color: var(--muted); font-size: 0.92rem; }
+
+  /* ---------- Skills ---------- */
+  .grid { display: grid; gap: 1rem; }
+  .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.4rem; transition: border-color .15s ease, transform .15s ease; }
+  .card:hover { border-color: rgba(139,92,246,.5); transform: translateY(-2px); }
+  .card h3 { display: flex; align-items: center; gap: 0.6rem; font-size: 1.05rem; }
+  .card .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--purple); box-shadow: 0 0 12px var(--purple); flex: none; }
+  .card.em .dot { background: var(--emerald); box-shadow: 0 0 12px var(--emerald); }
+  .card p { color: var(--muted); font-size: 0.95rem; margin: 0; }
+
+  /* ---------- Featured project ---------- */
+  .project { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; }
+  .project-head { padding: 2rem; border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1.2rem; align-items: flex-start;
+    background: linear-gradient(135deg, rgba(139,92,246,.12), transparent 50%, rgba(16,185,129,.10)); }
+  .project-head h3 { font-size: 1.6rem; margin-bottom: 0.3rem; }
+  .project-head .sub { color: var(--muted); max-width: 64ch; margin: 0; }
+  .project-links { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+  .project-body { display: grid; grid-template-columns: 1.1fr 1fr; gap: 0; }
+  .project-col { padding: 2rem; }
+  .project-col + .project-col { border-left: 1px solid var(--border); }
+  .project-col h4 { font-size: 0.8rem; letter-spacing: .12em; text-transform: uppercase; color: var(--emerald); margin-bottom: 1rem; }
+  .feature-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.7rem; }
+  .feature-list li { padding-left: 1.5rem; position: relative; color: var(--text); font-size: 0.96rem; }
+  .feature-list li::before { content: "▸"; position: absolute; left: 0.2rem; color: var(--purple); font-weight: 700; }
+  .feature-list li b { color: #fff; }
+  .arch { display: grid; gap: 0.7rem; }
+  .arch-row { display: grid; grid-template-columns: 130px 1fr; gap: 0.8rem; padding: 0.7rem 0.9rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; font-size: 0.92rem; }
+  .arch-row b { color: #c4b5fd; }
+  .arch-row span { color: var(--muted); }
+  .project-foot { padding: 1.6rem 2rem 2rem; border-top: 1px solid var(--border); }
+  .project-foot h4 { font-size: 0.8rem; letter-spacing: .12em; text-transform: uppercase; color: var(--emerald); margin-bottom: 0.8rem; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.4rem; }
+  .stat { text-align: center; padding: 1rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; }
+  .stat b { display: block; font-size: 1.6rem; color: #fff; }
+  .stat span { color: var(--muted); font-size: 0.85rem; }
+
+  .project.placeholder { margin-top: 1.5rem; border-style: dashed; }
+  .project.placeholder .project-head { background: none; }
+  .soon { color: var(--muted); font-size: 0.9rem; font-style: italic; }
+
+  /* ---------- Support ---------- */
+  .support { background: linear-gradient(180deg, var(--bg-elev), var(--bg)); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .support-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1.5rem; }
+  .support .card h3 { font-size: 1.05rem; }
+  .policy { margin-top: 1.5rem; padding: 1.2rem 1.4rem; border-left: 3px solid var(--emerald); background: var(--emerald-soft); border-radius: 0 12px 12px 0; color: var(--text); }
+  .policy b { color: #6ee7b7; }
+
+  /* ---------- Footer ---------- */
+  footer { padding: 2.5rem 0; color: var(--muted); font-size: 0.9rem; }
+  footer .container { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 960px) {
+    .principles, .stats { grid-template-columns: repeat(2, 1fr); }
+    .grid.cols-3 { grid-template-columns: repeat(2, 1fr); }
+    .project-body { grid-template-columns: 1fr; }
+    .project-col + .project-col { border-left: 0; border-top: 1px solid var(--border); }
+  }
+  @media (max-width: 640px) {
+    section { padding: 3rem 0; }
+    .hero { padding: 4rem 0 3rem; }
+    .nav-links { display: none; }
+    .principles, .stats, .grid.cols-3, .grid.cols-2, .support-grid { grid-template-columns: 1fr; }
+    .project-head, .project-col, .project-foot { padding: 1.3rem; }
+    .arch-row { grid-template-columns: 1fr; gap: 0.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<header class="nav">
+  <div class="container">
+    <a class="brand" href="#top">IronFrame<span>.</span></a>
+    <nav class="nav-links">
+      <a href="#skills">Skills</a>
+      <a href="#projects">Projects</a>
+      <a href="#process">Process</a>
+      <a href="#support">Support</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <div class="container">
+    <span class="eyebrow">Unity Asset Store Publisher</span>
+    <h1>Hi, I'm IronFrame —<br><span class="accent">Systems &amp; Tools Developer</span></h1>
+    <p class="tag">I build the engine underneath the game: clean, data-driven Unity frameworks that other developers ship on. Modular architecture, measured performance, and support that answers.</p>
+    <div class="btn-row">
+      <a class="btn primary" href="#projects">View Featured Template</a>
+      <a class="btn" href="https://github.com/IronFrame-Industries">GitHub</a>
+      <a class="btn" href="#support">Contact</a>
+    </div>
+    <div class="badges">
+      <span class="badge purple">Unity 6000.x · 2022.3 LTS</span>
+      <span class="badge purple">C# 10</span>
+      <span class="badge emerald">ScriptableObject Architecture</span>
+      <span class="badge emerald">Zero-GC Gameplay Loops</span>
+      <span class="badge">Event-Driven UI</span>
+      <span class="badge">Editor Tooling</span>
+    </div>
+
+    <div class="principles">
+      <div class="principle"><div class="ico">🧩</div><b>Modular by default</b><span>Every system is replaceable without touching the others.</span></div>
+      <div class="principle"><div class="ico">⚡</div><b>Performance first</b><span>Pooled, allocation-free loops, profiled against 0 B GC.</span></div>
+      <div class="principle"><div class="ico">📚</div><b>Docs as a feature</b><span>Architecture guides and tutorials that explain the <em>why</em>.</span></div>
+      <div class="principle"><div class="ico">🤝</div><b>Support as a promise</b><span>Every question answered, every bug in the next patch.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SKILLS ============ -->
+<section id="skills">
+  <div class="container">
+    <span class="eyebrow">Core Technical Skills</span>
+    <h2>What I bring to a codebase</h2>
+    <p class="lead">Game templates are judged by the developer who extends them. These are the disciplines I build every package around.</p>
+    <div class="grid cols-3" style="margin-top:1.8rem">
+      <div class="card"><h3><span class="dot"></span>Unity (2022.3 LTS → Unity 6)</h3><p>Editor tooling, custom inspectors, batch-mode automation, EditMode &amp; PlayMode tests, Built-in / URP / HDRP agnostic code.</p></div>
+      <div class="card"><h3><span class="dot"></span>C#</h3><p>Typed, allocation-aware code: readonly structs, <code>in</code> parameters, cached lookups, no LINQ or closures in hot paths.</p></div>
+      <div class="card em"><h3><span class="dot"></span>ScriptableObject Architecture</h3><p>Data-driven design: item, enemy and difficulty databases; strategy-object behaviours; SO event channels for designers.</p></div>
+      <div class="card em"><h3><span class="dot"></span>Performance Optimization</h3><p>Object pooling for thousands of entities, flat registries instead of physics queries, per-frame budgets, Profiler-verified zero GC.</p></div>
+      <div class="card"><h3><span class="dot"></span>Event-Driven Programming</h3><p>Typed static event buses, UI that subscribes instead of polling, state machines with explicit, logged transitions.</p></div>
+      <div class="card"><h3><span class="dot"></span>Systems Engineering</h3><p>Stat modifier pipelines, inventory and upgrade systems, difficulty directors, save/load with corruption recovery.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROJECTS ============ -->
+<section id="projects">
+  <div class="container">
+    <span class="eyebrow">Featured Projects</span>
+    <h2>Templates built to be extended</h2>
+    <p class="lead">Each package ships with full C# source, a demo scene, a one-click scene builder, and documentation with step-by-step tutorials.</p>
+
+    <!-- Featured: Horde Survival Template -->
+    <article class="project" style="margin-top:1.8rem">
+      <div class="project-head">
+        <div>
+          <h3>🛡️ Horde Survival Template</h3>
+          <p class="sub">A complete Vampire Survivors / Brotato–style roguelike framework: thousands of pooled enemies, data-driven weapons and upgrades, weighted level-up loop, FSM enemies, difficulty pacing, save system and event-driven UI. 100% C# source, zero art dependencies.</p>
+        </div>
+        <div class="project-links">
+          <a class="btn emerald" href="docs.html">📄 Documentation</a>
+          <a class="btn" href="#support">🛒 Asset Store listing: in review</a>
+        </div>
+      </div>
+
+      <div class="project-body">
+        <div class="project-col">
+          <h4>Core Features</h4>
+          <ul class="feature-list">
+            <li><b>Weapons &amp; Upgrades Database</b>: SO weapons with per-tier stats and swappable Weapon Behaviours (projectile fan, area aura, add your own in one file); passive items with per-tier modifiers.</li>
+            <li><b>Weighted Level-Up Choices</b>: pauses play, rolls un-maxed upgrades by Common / Rare / Epic / Legendary weights plus Luck, queues multiple level-ups.</li>
+            <li><b>Difficulty Director</b>: spawn-rate, burst-size and enemy-cap curves over time; enemy roster unlocks by minute; victory timer.</li>
+            <li><b>AI Finite State Machine</b>: reusable <code>BaseState</code> / <code>StateMachine</code> / <code>AIController</code> with Idle, Chase, Attack; custom states drop in.</li>
+            <li><b>Combat Pipeline</b>: armor, crits, knockback, i-frames, piercing projectiles, pooled floating damage numbers.</li>
+            <li><b>Save / Load</b>: JSON via <code>ISaveable</code>, obfuscation, atomic writes, automatic backup, corruption recovery.</li>
+            <li><b>UI Framework</b>: screens driven purely by game-state events: menu, HUD, pause, level-up cards, game over / victory.</li>
+            <li><b>One-click Demo Builder</b>: generates layers, data assets, prefabs, player, spawner and UI from a menu item.</li>
+          </ul>
+        </div>
+        <div class="project-col">
+          <h4>Architecture Highlights</h4>
+          <div class="arch">
+            <div class="arch-row"><b>Object Pooling</b><span><code>PoolManager</code> → <code>ObjectPool</code> (Stack-based, O(1)) → <code>PooledObject</code> with cached <code>IPoolable</code> hooks. No Instantiate/Destroy during play.</span></div>
+            <div class="arch-row"><b>Entity Registry</b><span>Flat <code>EnemyRegistry</code> with O(1) swap-remove; nearest / radius queries without Physics2D.</span></div>
+            <div class="arch-row"><b>Decoupling</b><span>Typed static <code>GameEvents</code> bus + ScriptableObject event channels. UI subscribes; nothing polls in <code>Update()</code>.</span></div>
+            <div class="arch-row"><b>Data vs State</b><span><code>ItemData</code> (static SO) ⇄ <code>ItemInstance</code> (runtime tier, cooldown, stats). Same split for enemies and player.</span></div>
+            <div class="arch-row"><b>Stat Pipeline</b><span><code>(base + Σflat) × (1 + Σ%add) × Π(1 + %mult)</code>, cached per stat, modifiers removable by source.</span></div>
+            <div class="arch-row"><b>Game Flow</b><span>Abstract <code>GameManagerBase</code> state machine controlling <code>timeScale</code>; concrete manager adds run stats and scene loading.</span></div>
+            <div class="arch-row"><b>Compatibility</b><span>Legacy Input Manager or Input System via <code>#if</code>; Unity 6 API differences guarded; asmdefs tolerate missing optional packages.</span></div>
+            <div class="arch-row"><b>Verification</b><span>Batch-mode compile on Unity 6000.6 (0 warnings) + automated PlayMode smoke test covering spawning, kills, level-ups, pause and game-over.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-foot">
+        <div class="stats">
+          <div class="stat"><b>60</b><span>commented C# scripts</span></div>
+          <div class="stat"><b>0 B</b><span>GC alloc in steady state</span></div>
+          <div class="stat"><b>12</b><span>decoupled systems</span></div>
+          <div class="stat"><b>0</b><span>third-party dependencies</span></div>
+        </div>
+        <h4>Package layout</h4>
+<pre><code>Scripts/
+├── Core/      GameState · GameEvents · GameManagerBase · HordeGameManager · Events/
+├── Pooling/   PoolManager · ObjectPool · PooledObject · IPoolable
+├── Stats/     StatType · StatModifier · StatSheet
+├── Data/      PlayerStatsData · ItemData · WeaponData · PassiveItemData · EnemyData · DifficultyData · UpgradeDatabase
+├── Inventory/ ItemInstance · PlayerInventory
+├── Combat/    Health · Projectile · DamagePopup · WeaponController · WeaponBehavior · Behaviors/
+├── Player/    PlayerCharacter · PlayerController · InputReader · ExperienceGem · CameraFollow
+├── Enemies/   EnemyController · EnemyRegistry · EnemySpawner · GameTimer
+├── AI/        BaseState · StateMachine · AIController · States/
+├── Systems/   LevelUpChoiceSystem
+├── Save/      ISaveable · SaveManager · MetaProgression
+└── UI/        UIManager · UIView · Views/</code></pre>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<!-- ============ PROCESS ============ -->
+<section id="process">
+  <div class="container">
+    <span class="eyebrow">How I Build</span>
+    <h2>Process behind every package</h2>
+    <div class="grid cols-2" style="margin-top:1.8rem">
+      <div class="card"><h3><span class="dot"></span>1. Architecture before features</h3><p>Namespaces, the data/state split and the event bus are designed first. Features are added to a stable skeleton, never bolted on.</p></div>
+      <div class="card em"><h3><span class="dot"></span>2. Measure, don't guess</h3><p>Every package is profiled (GC Alloc = 0 B in steady state) and smoke-tested in batch mode on the supported Unity versions before release.</p></div>
+      <div class="card em"><h3><span class="dot"></span>3. Documentation is part of the product</h3><p>README with an architecture diagram, setup checklist and step-by-step tutorials: add an item, add an enemy, add an AI state, add a weapon behaviour.</p></div>
+      <div class="card"><h3><span class="dot"></span>4. Versioned, changelogged, supported</h3><p>Semantic versions, a CHANGELOG inside the package, a public roadmap, and free updates for the life of the package.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SUPPORT ============ -->
+<section id="support" class="support">
+  <div class="container">
+    <span class="eyebrow">Support &amp; Contact</span>
+    <h2>Support is part of the purchase</h2>
+    <p class="lead">Every buyer gets a direct line, a community, and a fix pipeline. Response targets are published and kept.</p>
+    <div class="support-grid">
+      <div class="card em"><h3><span class="dot"></span>💬 GitHub</h3><p><a href="https://github.com/IronFrame-Industries">github.com/IronFrame-Industries</a><br>Questions, bug reports and feature requests via GitHub Issues. Acknowledged within <b>48 hours</b>.</p></div>
+      <div class="card"><h3><span class="dot"></span>📄 Documentation</h3><p>Full README with architecture overview, setup checklist and step-by-step tutorials ships inside every package and is <a href="docs.html">mirrored here</a>.</p></div>
+      <div class="card"><h3><span class="dot"></span>🔄 Updates</h3><p>Reproducible bugs fixed in the next patch release. Free updates for the life of the package, kept current with new Unity versions.</p></div>
+    </div>
+    <div class="policy"><b>Response policy:</b> acknowledged within 48 h · reproducible bugs fixed within 7 days · feature requests tracked publicly · documentation mirrored on this site.</div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="container">
+    <div><b style="color:var(--text)">IronFrame</b> · Systems &amp; Tools Developer · <a href="https://github.com/IronFrame-Industries">github.com/IronFrame-Industries</a></div>
+    <div>Clean architecture. Measured performance. Real support.</div>
+  </div>
+</footer>
+
+</body>
+</html>
