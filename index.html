@@ -132,9 +132,10 @@
   .stat b { display: block; font-size: 1.6rem; color: #fff; }
   .stat span { color: var(--muted); font-size: 0.85rem; }
 
-  .project.placeholder { margin-top: 1.5rem; border-style: dashed; }
-  .project.placeholder .project-head { background: none; }
-  .soon { color: var(--muted); font-size: 0.9rem; font-style: italic; }
+  .gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding: 1.5rem 2rem 0; }
+  .gallery figure { margin: 0; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .gallery img { display: block; width: 100%; height: auto; }
+  .gallery figcaption { padding: 0.6rem 0.9rem; font-size: 0.85rem; color: var(--muted); }
 
   /* ---------- Support ---------- */
   .support { background: linear-gradient(180deg, var(--bg-elev), var(--bg)); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
@@ -160,6 +161,7 @@
     .nav-links { display: none; }
     .principles, .stats, .grid.cols-3, .grid.cols-2, .support-grid { grid-template-columns: 1fr; }
     .project-head, .project-col, .project-foot { padding: 1.3rem; }
+    .gallery { grid-template-columns: 1fr; padding: 1.3rem 1.3rem 0; }
     .arch-row { grid-template-columns: 1fr; gap: 0.2rem; }
   }
 </style>
@@ -240,9 +242,15 @@
           <p class="sub">A complete Vampire Survivors / Brotato–style roguelike framework: thousands of pooled enemies, data-driven weapons and upgrades, weighted level-up loop, FSM enemies, difficulty pacing, save system and event-driven UI. 100% C# source, zero art dependencies.</p>
         </div>
         <div class="project-links">
-          <a class="btn emerald" href="docs.html">📄 Documentation</a>
+          <a class="btn emerald" href="demo/index.html">🎮 Play the Demo (WebGL)</a>
+          <a class="btn" href="docs.html">📄 Documentation</a>
           <a class="btn" href="#support">🛒 Asset Store listing: in review</a>
         </div>
+      </div>
+
+      <div class="gallery">
+        <figure><img src="screenshot-gameplay.png" alt="Demo scene running: HUD with health, XP bar, timer, kill counter and item slots while enemies close in"><figcaption>In-game HUD: health, XP, timer, kills and item slots, all event-driven</figcaption></figure>
+        <figure><img src="screenshot-levelup.png" alt="Level-up screen with three upgrade cards: Swift Boots, Magnet and a purple Epic Lucky Clover"><figcaption>Weighted level-up choices with rarity-coloured cards; Epic card rolled via the Luck stat</figcaption></figure>
       </div>
 
       <div class="project-body">
